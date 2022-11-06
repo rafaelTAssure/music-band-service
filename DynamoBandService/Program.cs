@@ -2,6 +2,8 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 
 var builder = WebApplication.CreateBuilder(args);
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 
 // Add services to the container.
 
@@ -10,9 +12,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
+builder.Services.AddCors(p => p.AddPolicy(MyAllowSpecificOrigins, builder =>
 {
-    builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+    builder.WithOrigins("*").AllowAnyHeader().AllowAnyMethod();
 }));
 
 var awsOptions = builder.Configuration.GetAWSOptions();
@@ -29,9 +31,9 @@ var app = builder.Build();
     app.UseSwaggerUI();
 //}
 
-app.UseCors("corsapp");
-
 app.UseHttpsRedirection();
+
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthorization();
 
