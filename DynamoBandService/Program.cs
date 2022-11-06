@@ -29,6 +29,8 @@ var app = builder.Build();
     app.UseSwaggerUI();
 //}
 
+app.UseCors("corsapp");
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
