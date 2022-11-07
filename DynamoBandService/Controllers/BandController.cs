@@ -51,7 +51,8 @@ namespace DynamoBandService.Controllers
                 return BadRequest("Empty field");
             }
 
-            var bandSortId = KeysHelper.BuildKey(BAND, bandRequest.Name);
+            var id = Guid.NewGuid().ToString();
+            var bandSortId = KeysHelper.BuildKey(BAND, id);
 
             var band = await _context.LoadAsync<Band>(BAND, bandSortId);
             if (band != null)

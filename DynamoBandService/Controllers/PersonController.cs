@@ -51,7 +51,8 @@ namespace DynamoBandService.Controllers
                 return BadRequest("An e-mail is required");
             }
 
-            var personSortId = KeysHelper.BuildKey(PERSON, personRequest.Email);
+            var sortGuidPart = Guid.NewGuid().ToString();
+            var personSortId = KeysHelper.BuildKey(PERSON, sortGuidPart);
             var person = await _context.LoadAsync<Person>(PERSON, personSortId);
             if (person != null)
             {
