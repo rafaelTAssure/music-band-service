@@ -19,8 +19,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "AWS-USER": "music",
         "AWS-REGION": "us-east-1",
-        "AWS-ACCESS-KEY-ID": "AKIAQWGKZBBFCAL36A2K",
-        "AWS-SECRET-KEY-ID": "lEkLSQiE/TnejCYoVaWVEm51zbnGow9lx3Z0Mfvi"
+        "AWS-ACCESS-KEY-ID": "",
+        "AWS-SECRET-KEY-ID": ""
       }
     },
     "IIS Express": {
