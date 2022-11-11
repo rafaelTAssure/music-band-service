@@ -38,7 +38,6 @@ namespace DynamoBandService.Services
             };
 
             await _repository.Save(person);
-            //await _context.SaveAsync(person);
 
             return person;
         }
@@ -46,14 +45,12 @@ namespace DynamoBandService.Services
         public async Task<Person> DeletePerson(string sortId)
         {
             var person = await _repository.Load(PERSON, sortId);
-            //var person = await _context.LoadAsync<Person>(PERSON, sortId);
             if (person == null)
             {
                 throw new NullReferenceException();
             }
 
             await _repository.Delete(person);
-            //await _context.DeleteAsync(person);
 
             return person;
         }
@@ -66,7 +63,6 @@ namespace DynamoBandService.Services
             };
 
             var persons = await _repository.Query(PERSON, QueryOperator.BeginsWith, queryVal);
-            //var persons = await _context.QueryAsync<Person>(PERSON, QueryOperator.BeginsWith, queryVal).GetRemainingAsync();
 
             return persons;
         }
@@ -74,7 +70,6 @@ namespace DynamoBandService.Services
         public async Task<Person> GetPersonById(string sortId)
         {
             var person = await _repository.Load(PERSON, sortId);
-            //var person = await _context.LoadAsync<Person>(PERSON, sortId);
             
             if (person == null)
             {
@@ -91,7 +86,6 @@ namespace DynamoBandService.Services
                 throw new ArgumentNullException();
             }
             var person = await _repository.Load(PERSON, personRequest.SortId);
-            //var person = await _context.LoadAsync<Person>(PERSON, personRequest.SortId);
             if (person == null)
             {
                 throw new NullReferenceException();
@@ -103,7 +97,6 @@ namespace DynamoBandService.Services
             person.DateOfBirth = personRequest.DateOfBirth;
 
             await _repository.Save(person);
-            //await _context.SaveAsync(person);
 
             return person;
         }
