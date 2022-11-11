@@ -1,8 +1,6 @@
-﻿using Amazon.DynamoDBv2.DataModel;
-using Amazon.DynamoDBv2.DocumentModel;
-using DynamoBandService.Helpers;
-using DynamoBandService.Models;
+﻿using DynamoBandService.Models;
 using DynamoBandService.Models.DTOs;
+using DynamoBandService.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DynamoBandService.Controllers
@@ -11,99 +9,112 @@ namespace DynamoBandService.Controllers
     [ApiController]
     public class ArtistController : Controller
     {
-        private readonly string ARTIST = "ARTIST";
-        private readonly IDynamoDBContext _context;
+        private readonly IArtistService _artistService;
 
-        public ArtistController(IDynamoDBContext context)
+        public ArtistController(IArtistService artistService)
         {
-            _context = context;
+            _artistService = artistService;
         }
 
         [HttpGet("{sortId}")]
         public async Task<IActionResult> GetById(string sortId)
         {
-            var artist = await _context.LoadAsync<Artist>(ARTIST, sortId);
-
-            if (artist == null)
+            try
             {
-                return NotFound();
-            }
+                var artist = await _artistService.GetArtistById(sortId);
 
-            return Ok(artist);
+                if (artist == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(artist);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500);
+            }
+            
         }
 
         [HttpGet("artist-by-band/{bandSortId}")]
         public async Task<IActionResult> GetAllArtistsByBand(string bandSortId)
         {
-            List<object> queryVal = new()
+            try
             {
-                $"{bandSortId}#"
-            };
-
-            var artists = await _context.QueryAsync<Artist>(ARTIST, QueryOperator.BeginsWith, queryVal).GetRemainingAsync();
-            return Ok(artists);
+                var artists = await _artistService.GetArtistByBand(bandSortId);
+                return Ok(artists);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500);
+            }
         }
 
         // POST: ArtistController/Create
         [HttpPost]
         public async Task<IActionResult> CreateArtist(CreateArtistDTO artistRequest)
         {
-            if (string.IsNullOrEmpty(artistRequest.BandSortId))
+            try
             {
-                return BadRequest("BandSortId is empty");
+                var artist = await _artistService.CreateArtist(artistRequest);
+                return Ok(artist);
             }
-
-            Guid id = Guid.NewGuid();
-            var sortId = KeysHelper.BuildKey(artistRequest.BandSortId, id.ToString());
-
-            var artist = new Artist()
+            catch(ArgumentException e)
             {
-                Id = ARTIST,
-                SortId = sortId,
-                Name = artistRequest.Name,
-                Email = artistRequest.Email,
-                DateOfBirth = artistRequest.DateOfBirth,
-                NickName = artistRequest.NickName,
-                Nationality = artistRequest.Nationality,
-                DebutYear = artistRequest.DebutYear
-            };
-
-            await _context.SaveAsync(artist);
-
-            return Ok(artist);
+                Console.WriteLine(e.Message);
+                return BadRequest("Required field is empty");
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500);
+            }
+            
         }
 
         [HttpDelete("{sortId}")]
         public async Task<IActionResult> DeleteArtist(string sortId)
         {
-            var artist = await _context.LoadAsync<Artist>(ARTIST, sortId);
-            if (artist == null)
+            try
             {
-                return NotFound();
+                await _artistService.DeleteArtist(sortId);
+                return NoContent();
             }
-
-            await _context.DeleteAsync(artist);
-            return NoContent();
+            catch(NullReferenceException e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest("Required field is empty");
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500);
+            }
+            
         }
 
         [HttpPut]
         public async Task<IActionResult> UpdateArtist(Artist artistRequest)
         {
-            var artist = await _context.LoadAsync<Artist>(ARTIST, artistRequest.SortId);
-            if (artist == null)
+            try
             {
-                return NotFound("Artist Not Found");
+                var artist = await _artistService.UpdateArtist(artistRequest);
+                return Ok(artist);
             }
-
-            artist.Name = artistRequest.Name;
-            artist.DateOfBirth = artistRequest.DateOfBirth;
-            artist.DebutYear = artistRequest.DebutYear;
-            artist.Email = artistRequest.Email;
-            artist.NickName = artistRequest.NickName;
-            artist.Nationality = artistRequest.Nationality;
-
-            await _context.SaveAsync(artist);
-            return Ok(artist);
+            catch(NullReferenceException e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest("Artist does not exist");
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500);
+            }
+            
         }
     }
 }

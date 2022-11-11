@@ -1,8 +1,6 @@
-﻿using Amazon.DynamoDBv2.DataModel;
-using Amazon.DynamoDBv2.DocumentModel;
-using DynamoBandService.Helpers;
-using DynamoBandService.Models;
+﻿using DynamoBandService.Models;
 using DynamoBandService.Models.DTOs;
+using DynamoBandService.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DynamoBandService.Controllers
@@ -11,98 +9,106 @@ namespace DynamoBandService.Controllers
     [ApiController]
     public class PersonController : Controller
     {
-        private readonly string PERSON = "PERSON";
-        private readonly IDynamoDBContext _context;
-        public PersonController(IDynamoDBContext context)
+        private readonly IPersonService _personService;
+        public PersonController(IPersonService personService)
         {
-            _context = context;
+            _personService = personService;
         }
 
         [HttpGet("{sortId}")]
         public async Task<IActionResult> GetById(string sortId)
         {
-            var person = await _context.LoadAsync<Person>(PERSON, sortId);
-
-            if (person == null)
+            try
             {
-                return NotFound();
+                var person = await _personService.GetPersonById(sortId);
+                return Ok(person);
             }
-
-            return Ok(person);
+            catch(NullReferenceException e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest("Person not found");
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500);
+            }
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllPersons()
         {
-            List<object> queryVal = new()
+            try
             {
-                $"{PERSON}#"
-            };
+                var persons = await _personService.GetAllPersons();
+                return Ok(persons);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500);
+            }
 
-            var persons = await _context.QueryAsync<Person>(PERSON, QueryOperator.BeginsWith, queryVal).GetRemainingAsync();
-            return Ok(persons);
         }
 
         [HttpPost]
         public async Task<IActionResult> CreatePerson(CreatePersonDTO personRequest)
         {
-            if (string.IsNullOrEmpty(personRequest.Email))
+            try
             {
-                return BadRequest("An e-mail is required");
+                var person = await _personService.CreatePerson(personRequest);
+                return Ok(person);
+            } 
+            catch(ArgumentNullException e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest("Email is needed");
             }
-
-            var sortGuidPart = Guid.NewGuid().ToString();
-            var personSortId = KeysHelper.BuildKey(PERSON, sortGuidPart);
-            var person = await _context.LoadAsync<Person>(PERSON, personSortId);
-            if (person != null)
+            catch (Exception e)
             {
-                return BadRequest($"Person with Id {personSortId} Already Exists");
+                Console.WriteLine(e.Message);
+                return StatusCode(500);
             }
-
-            person = new Person()
-            {
-                Id = PERSON,
-                SortId = personSortId,
-                Email = personRequest.Email,
-                Name = personRequest.Name,
-                DateOfBirth = personRequest.DateOfBirth,
-                Nationality = personRequest.Nationality,
-            };
-
-            await _context.SaveAsync(person);
-
-            return Ok(person);
         }
 
         [HttpDelete("{sortId}")]
         public async Task<IActionResult> DeletePerson(string sortId)
         {
-            var person = await _context.LoadAsync<Person>(PERSON, sortId);
-            if (person == null)
+            try
             {
-                return NotFound();
+                await _personService.DeletePerson(sortId);
+                return NoContent();
             }
-
-            await _context.DeleteAsync(person);
-            return NoContent();
+            catch(NullReferenceException e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest("Person not found, already deleted");
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500);
+            }
         }
 
         [HttpPut]
         public async Task<IActionResult> UpdatePerson(Person personRequest)
         {
-            var person = await _context.LoadAsync<Person>(PERSON, personRequest.SortId);
-            if (person == null)
+            try
             {
-                return NotFound("Element Not Found");
+                var person = await _personService.UpdatePerson(personRequest);
+                return Ok(person);
             }
-
-            person.Name = personRequest.Name;
-            person.Email = personRequest.Email;
-            person.Nationality = personRequest.Nationality;
-            person.DateOfBirth = personRequest.DateOfBirth;
-
-            await _context.SaveAsync(person);
-            return Ok(person);
+            catch (NullReferenceException e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest("Person not found");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500);
+            }
         }
     }
 }

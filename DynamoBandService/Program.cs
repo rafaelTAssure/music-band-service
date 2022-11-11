@@ -2,6 +2,10 @@ using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.Runtime;
+using DynamoBandService.Repositories;
+using DynamoBandService.Repositories.Interfaces;
+using DynamoBandService.Services;
+using DynamoBandService.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -24,6 +28,11 @@ var config = new AmazonDynamoDBConfig()
 var client = new AmazonDynamoDBClient(credentials, config);
 builder.Services.AddSingleton<IAmazonDynamoDB>(client);
 builder.Services.AddScoped<IDynamoDBContext, DynamoDBContext>();
+
+builder.Services.AddScoped<IBandService, BandService>();
+builder.Services.AddScoped<IArtistService, ArtistService>();
+builder.Services.AddScoped<IPersonService, PersonService>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 var app = builder.Build();
 

@@ -1,8 +1,6 @@
-﻿using Amazon.DynamoDBv2.DataModel;
-using Amazon.DynamoDBv2.DocumentModel;
-using DynamoBandService.Helpers;
-using DynamoBandService.Models;
+﻿using DynamoBandService.Models;
 using DynamoBandService.Models.DTOs;
+using DynamoBandService.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DynamoBandService.Controllers
@@ -11,95 +9,109 @@ namespace DynamoBandService.Controllers
     [ApiController]
     public class BandController : Controller
     {
-        private readonly string BAND = "BAND";
-        private readonly IDynamoDBContext _context;
-        public BandController(IDynamoDBContext context)
+        private readonly IBandService _bandService;
+        public BandController(IBandService bandService)
         {
-            _context = context;
+            _bandService = bandService;
         }
 
         [HttpGet("{sortId}")]
         public async Task<IActionResult> GetById(string sortId)
         {
-            var band = await _context.LoadAsync<Band>(BAND, sortId);
-
-            if (band == null)
+            try
             {
-                return NotFound();
-            }
+                var band = await _bandService.GetBandById(sortId);
 
-            return Ok(band);
+                if (band == null)
+                {
+                    return NotFound("Band not Found");
+                }
+
+                return Ok(band);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500);
+            }
+            
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllBands()
         {
-            List<object> queryVal = new()
+            try
             {
-                $"{BAND}#"
-            };
-
-            var bands = await _context.QueryAsync<Band>(BAND, QueryOperator.BeginsWith, queryVal).GetRemainingAsync();
-            return Ok(bands);
+                var bands = await _bandService.GetAllBands();
+                return Ok(bands);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500);
+            }
+            
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateBand(CreateBandDTO bandRequest)
         {
-            if (string.IsNullOrEmpty(bandRequest.Name))
+            try
             {
-                return BadRequest("Empty field");
+                var band = await _bandService.CreateBand(bandRequest);
+                return Ok(band);
             }
-
-            var id = Guid.NewGuid().ToString();
-            var bandSortId = KeysHelper.BuildKey(BAND, id);
-
-            var band = await _context.LoadAsync<Band>(BAND, bandSortId);
-            if (band != null)
+            catch(ArgumentException e)
             {
-                return BadRequest($"Band with Id {bandSortId} Already Exists");
+                Console.WriteLine(e.Message);
+                return BadRequest("Required field is empty");
             }
-
-            band = new Band()
+            catch(Exception e)
             {
-                Id = BAND,
-                SortId = bandSortId,
-                Name = bandRequest.Name,
-                Genre = bandRequest.Genre
-            };
-
-            await _context.SaveAsync(band);
-
-            return Ok(band);
+                Console.WriteLine(e.Message);
+                return StatusCode(500);
+            }
         }
 
         [HttpDelete("{sortId}")]
         public async Task<IActionResult> DeleteBand(string sortId)
         {
-            var band = await _context.LoadAsync<Band>(BAND, sortId);
-            if (band == null)
+            try
             {
-                return NotFound();
+                await _bandService.DeleteBand(sortId);
+                return NoContent();
             }
-
-            await _context.DeleteAsync(band);
-            return NoContent();
+            catch(NullReferenceException e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest("Band not found");
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500);
+            }
+            
         }
 
         [HttpPut]
         public async Task<IActionResult> UpdateBand(Band bandRequest)
         {
-            var band = await _context.LoadAsync<Band>(BAND, bandRequest.SortId);
-            if (band == null)
+            try
             {
-                return NotFound("Element Not Found");
+                var band = await _bandService.UpdateBand(bandRequest);
+                return Ok(band);
             }
-
-            band.Genre = bandRequest.Genre;
-            band.Name = bandRequest.Name;
-
-            await _context.SaveAsync(band);
-            return Ok(band);
+            catch(NullReferenceException e) 
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest("Band not found");
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500);
+            }
         }
     }
 }
