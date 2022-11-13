@@ -25,7 +25,7 @@ namespace DynamoBandService.Controllers
 
                 if (artist == null)
                 {
-                    return NotFound();
+                    return NotFound("Artist not found");
                 }
 
                 return Ok(artist);
@@ -35,7 +35,6 @@ namespace DynamoBandService.Controllers
                 Console.WriteLine(e.Message);
                 return StatusCode(500);
             }
-            
         }
 
         [HttpGet("artist-by-band/{bandSortId}")]
