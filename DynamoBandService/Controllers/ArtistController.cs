@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DynamoBandService.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/artists")]
     [ApiController]
     public class ArtistController : Controller
     {
@@ -37,7 +37,7 @@ namespace DynamoBandService.Controllers
             }
         }
 
-        [HttpGet("artist-by-band/{bandSortId}")]
+        [HttpGet("band/{bandSortId}")]
         public async Task<IActionResult> GetAllArtistsByBand(string bandSortId)
         {
             try
@@ -52,7 +52,6 @@ namespace DynamoBandService.Controllers
             }
         }
 
-        // POST: ArtistController/Create
         [HttpPost]
         public async Task<IActionResult> CreateArtist(CreateArtistDTO artistRequest)
         {

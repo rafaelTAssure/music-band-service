@@ -16,8 +16,5 @@ namespace DynamoBandService.Models
 
         [DynamoDBProperty("genre")]
         public string? Genre { get; set; }
-/*
-        [DynamoDBProperty("artists")]
-        public List<Artist> Artists { get; set; } = new List<Artist>();*/
     }
 }

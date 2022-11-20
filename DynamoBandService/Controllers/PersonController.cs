@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DynamoBandService.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/persons")]
     [ApiController]
     public class PersonController : Controller
     {
