@@ -1,5 +1,4 @@
-﻿using Amazon.DynamoDBv2.DataModel;
-using Amazon.DynamoDBv2.DocumentModel;
+﻿using Amazon.DynamoDBv2.DocumentModel;
 using DynamoBandService.Helpers;
 using DynamoBandService.Models;
 using DynamoBandService.Models.DTOs;
@@ -40,7 +39,6 @@ namespace DynamoBandService.Services
             };
 
             await _repository.Save(artist);
-            //await _context.SaveAsync(artist);
 
             return artist;
         }
@@ -48,7 +46,6 @@ namespace DynamoBandService.Services
         public async Task<Artist> DeleteArtist(string sortId)
         {
             var artist = await _repository.Load(ARTIST, sortId);
-            //var artist = await _context.LoadAsync<Artist>(ARTIST, sortId);
             if (artist == null)
             {
                 throw new NullReferenceException();
@@ -67,7 +64,6 @@ namespace DynamoBandService.Services
             };
 
             var artists = await _repository.Query(ARTIST, QueryOperator.BeginsWith, queryVal);
-            //var artists = await _context.QueryAsync<Artist>(ARTIST, QueryOperator.BeginsWith, queryVal).GetRemainingAsync();
 
             return artists;
         }
@@ -75,7 +71,6 @@ namespace DynamoBandService.Services
         public Task<Artist> GetArtistById(string sortId)
         {
             return _repository.Load(ARTIST, sortId);
-            //return _context.LoadAsync<Artist>(ARTIST, sortId);
         }
 
         public async Task<Artist> UpdateArtist(Artist artistRequest)
@@ -86,7 +81,6 @@ namespace DynamoBandService.Services
             }
 
             var artist = await _repository.Load(ARTIST, artistRequest.SortId);
-            //var artist = await _context.LoadAsync<Artist>(ARTIST, artistRequest.SortId);
             if (artist == null)
             {
                 throw new NullReferenceException();
@@ -100,7 +94,6 @@ namespace DynamoBandService.Services
             artist.Nationality = artistRequest.Nationality;
 
             await _repository.Save(artist);
-            //await _context.SaveAsync(artist);
 
             return artist;
         }

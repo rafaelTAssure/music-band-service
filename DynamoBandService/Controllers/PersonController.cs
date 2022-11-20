@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DynamoBandService.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/persons")]
     [ApiController]
     public class PersonController : Controller
     {
@@ -26,7 +26,7 @@ namespace DynamoBandService.Controllers
             catch(NullReferenceException e)
             {
                 Console.WriteLine(e.Message);
-                return BadRequest("Person not found");
+                return NotFound("Person not found");
             }
             catch(Exception e)
             {

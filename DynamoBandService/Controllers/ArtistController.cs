@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DynamoBandService.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/artists")]
     [ApiController]
     public class ArtistController : Controller
     {
@@ -25,7 +25,7 @@ namespace DynamoBandService.Controllers
 
                 if (artist == null)
                 {
-                    return NotFound();
+                    return NotFound("Artist not found");
                 }
 
                 return Ok(artist);
@@ -35,10 +35,9 @@ namespace DynamoBandService.Controllers
                 Console.WriteLine(e.Message);
                 return StatusCode(500);
             }
-            
         }
 
-        [HttpGet("artist-by-band/{bandSortId}")]
+        [HttpGet("band/{bandSortId}")]
         public async Task<IActionResult> GetAllArtistsByBand(string bandSortId)
         {
             try
@@ -53,7 +52,6 @@ namespace DynamoBandService.Controllers
             }
         }
 
-        // POST: ArtistController/Create
         [HttpPost]
         public async Task<IActionResult> CreateArtist(CreateArtistDTO artistRequest)
         {

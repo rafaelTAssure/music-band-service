@@ -19,7 +19,6 @@ namespace DynamoBandService.Services
         public Task<Band> GetBandById(string sortId)
         {
             return _repository.Load(BAND, sortId);
-            //return _context.LoadAsync<Band>(BAND, sortId);
         }
 
         public async Task<List<Band>> GetAllBands()
@@ -30,7 +29,6 @@ namespace DynamoBandService.Services
             };
 
             var bands = await _repository.Query(BAND, QueryOperator.BeginsWith, queryVal);
-            //var bands = await _context.QueryAsync<Band>(BAND, QueryOperator.BeginsWith, queryVal).GetRemainingAsync();
 
             return bands;
         }
@@ -54,7 +52,6 @@ namespace DynamoBandService.Services
             };
 
             await _repository.Save(band);
-            //await _context.SaveAsync(band);
 
             return band;
         }
@@ -62,14 +59,12 @@ namespace DynamoBandService.Services
         public async Task<Band> DeleteBand(string sortId)
         {
             var band = await _repository.Load(BAND, sortId);
-            //var band = await _context.LoadAsync<Band>(BAND, sortId);
             if (band == null)
             {
                 throw new NullReferenceException();
             }
 
             await _repository.Delete(band);
-            //await _context.DeleteAsync(band);
 
             return band;
         }
@@ -82,7 +77,6 @@ namespace DynamoBandService.Services
             }
 
             var band = await _repository.Load(BAND, bandRequest.SortId);
-            //var band = await _context.LoadAsync<Band>(BAND, bandRequest.SortId);
             if (band == null)
             {
                 throw new NullReferenceException();
@@ -92,7 +86,6 @@ namespace DynamoBandService.Services
             band.Name = bandRequest.Name;
 
             await _repository.Save(band);
-            //await _context.SaveAsync(band);
 
             return band;
         }
